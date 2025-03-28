@@ -1,72 +1,128 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using models;
-using System.IO;
-using System;
-using TMPro;
+using Unity.VisualScripting;
 
 public class GameControllerPreguntas : MonoBehaviour
 {
-    List<PreguntasMultiples> listaPM;
-    string lineaLeida;
 
-    public TextMeshProUGUI txtPregunta;   
+    public List<GameObject> ListaControllers;
+    GameObject controllSelected;
+
+    public GameObject PreguntasA;
+    public GameObject PreguntasM;
+    public GameObject PreguntasFV;
+
+    public GameObject btnFaciles, btnDificiles;
+
+    public bool FacilesA, FacilesM, FacilesFV;
+    public bool DificilesA, DificilesM, DificilesFV;
 
     // Start is called before the first frame update
-    void Start()
-    {
-        listaPM = new List<PreguntasMultiples>();
-        leerPreguntasMultiples();
-    }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
 
     }
 
+    //
 
-    public void mostrarPregunta()
+    private void Update()
     {
-        txtPregunta.text = listaPM
-
 
     }
 
-
-    #region Leer Preguntas
-    public void leerPreguntasMultiples()
+    public void SeleccionarPreguntasFaciles()
     {
-        try
+        System.Random random = new System.Random();
+        int numero = random.Next(0, ListaControllers.Count);
+        Debug.Log("Num" + numero);
+        controllSelected = ListaControllers[numero];
+
+        // Selección de preguntas abiertas
+        if (controllSelected.GetComponent<PreguntasAbiertas>() != null)
         {
-            StreamReader sr1 = new StreamReader("Assets/Resources/Files/ArchivoPreguntasM.txt");
-            while ((lineaLeida = sr1.ReadLine()) != null)
-            {
-                string[] lineapartida = lineaLeida.Split("-");
-                string pregunta = lineapartida[0];
-                string respuesta1 = lineapartida[1];
-                string respuesta2 = lineapartida[2];
-                string respuesta3 = lineapartida[3];
-                string respuesta4 = lineapartida[4];
-                string respuestaCorrecta = lineapartida[5];
-                string versiculo = lineapartida[6];
-                string dicultad = lineapartida[7];
-
-                PreguntasMultiples objPM = new PreguntasMultiples(pregunta, respuesta1, respuesta2,
-                    respuesta3, respuesta4, respuestaCorrecta, versiculo, dicultad);
-
-                listaPM.Add(objPM);
-
-            }
-            Debug.Log("Tamaño de la lista preguntas multiple" + listaPM.Count);
+            MostrarPreguntasA();
         }
-        catch (Exception e)
+
+        // Selección de preguntas  opción múltiple
+        if (controllSelected.GetComponent<GameControllerPM>() != null)
         {
-            Debug.Log("ERROR " + e.ToString());
+            MostrarPreguntasM();
+        }
+
+        // Selección de preguntas falso y verdadero
+        if (controllSelected.GetComponent<GameControllerPFV>() != null)
+        {
+            MostrarPreguntasFV();
         }
     }
 
-    #endregion
+    //  mostrar preguntas abiertas
+    private void MostrarPreguntasA()
+    {
+        PreguntasFV.SetActive(false);
+        PreguntasM.SetActive(false);
+        PreguntasAbiertas controllerPreguntasA = controllSelected.GetComponent<PreguntasAbiertas>();
+        controllerPreguntasA.SeleccionarPreguntasAbiertas(true);
+        PreguntasA.SetActive(true);
+        Debug.Log("Tipo: GameControllerPreguntasA");
 
+        if (PreguntasAbiertas.TotalPFaciles)
+        {
+            FacilesA = true;
+        }
+        if (PreguntasAbiertas.TotalPDificiles)
+        {
+            DificilesA = true;
+        }
+
+    }
+
+    //  mostrar preguntas de opción múltiple
+    private void MostrarPreguntasM()
+    {
+        PreguntasA.SetActive(false);
+        PreguntasFV.SetActive(false);
+        GameControllerPM controllerPM = controllSelected.GetComponent<GameControllerPM>();
+        controllerPM.mostrarPregunta();
+        PreguntasM.SetActive(true);
+        Debug.Log("Tipo: GameControllerPM");
+
+        if (GameControllerPM.TotalPFaciles)
+        {
+            FacilesA = true;
+        }
+        if (GameControllerPM.TotalPDificiles)
+        {
+            DificilesA = true;
+        }
+    }
+
+    // mostrar preguntas de falso y verdadero
+    private void MostrarPreguntasFV()
+    {
+        PreguntasA.SetActive(false);
+        PreguntasM.SetActive(false);
+        GameControllerPFV controllerFV = controllSelected.GetComponent<GameControllerPFV>();
+        controllerFV.mostrarPregunta();
+        PreguntasFV.SetActive(true);
+        Debug.Log("Tipo: GameControllerPreguntasFV");
+
+
+        if (GameControllerPFV.TotalPFaciles)
+        {
+            FacilesA = true;
+        }
+        if (GameControllerPFV.TotalPDificiles)
+        {
+            DificilesA = true;
+        }
+    }
 }
+
+
+
+        
+
+    
